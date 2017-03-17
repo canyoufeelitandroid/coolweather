@@ -3,4 +3,6 @@
     <string name="china">中国</string>
     <string name="fail">加载失败</string>
     <string name="loading">正在加载...</string>
+    <string name="today">今天</string>
+    <string name="publish">发布</string>
 </resources>
