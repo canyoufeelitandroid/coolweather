@@ -3,7 +3,9 @@ package com.example.weather.coolweather.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +37,8 @@ public class ChooseActivity extends Activity {
     public static final int LEVEL_PROVINCE=0;
     public static final int LEVEL_CITY=1;
     public static final int LEVEL_COUNTY=2;
+
+    private boolean isFromWeatherActivity;
 
     private ProgressDialog progressDialog;
     private TextView titleText;
@@ -70,19 +74,21 @@ public class ChooseActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-          super.onCreate(savedInstanceState);
-//        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-//        if(prefs.getBoolean("city_selected",false)){
-//            Intent i=new Intent(ChooseActivity.this,WeatherActivity.class);
-//            startActivity(i);
-//            finish();
-//            return;
-//        }
+        super.onCreate(savedInstanceState);
+        isFromWeatherActivity=getIntent().getBooleanExtra("from_weather_activity",false);
+        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("city_selected",false)&&!isFromWeatherActivity){
+            Intent i=new Intent(ChooseActivity.this,WeatherActivity.class);
+            startActivity(i);
+            finish();
+            return;
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         db=CoolWeatherDB.getInstance(this);
         initUI();
         queryProvince(); //加载省级数据
+
     }
 
     private void initUI(){
@@ -105,7 +111,6 @@ public class ChooseActivity extends Activity {
                     Intent intent=new Intent(ChooseActivity.this,WeatherActivity.class);
                     intent.putExtra("county_code",countyCode);
                     startActivity(intent);
-                    finish();
                 }
             }
         });
@@ -123,7 +128,7 @@ public class ChooseActivity extends Activity {
             }
             adapter.notifyDataSetChanged();
             lv.setSelection(0);
-            titleText.setText(R.string.china);
+            titleText.setText(getText(R.string.china));
             currentLevel=LEVEL_PROVINCE;
         }else{
             queryFromServer(null,"province");

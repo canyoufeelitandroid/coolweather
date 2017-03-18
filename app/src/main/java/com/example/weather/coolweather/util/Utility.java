@@ -105,7 +105,6 @@ public class Utility {
             String temp2=weatherInfo.getString("temp2");
             String weatherDesp=weatherInfo.getString("weather");
             String publishTime=weatherInfo.getString("ptime");
-            Log.i("data","json");
             saveWeatherInfo(context,cityName,weatherCode,temp1,temp2,weatherDesp,publishTime);
         }catch (Exception e){
             e.printStackTrace();
@@ -117,14 +116,10 @@ public class Utility {
      */
     public static void saveWeatherInfo(Context context,String cityName,String weatherCode,String temp1,
                                        String temp2,String weatherDesp,String publishTime){
-        Log.i("data","shared1");
-        java.text.SimpleDateFormat adf=new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
 
-        Log.i("data","shared2");
+        java.text.SimpleDateFormat adf=new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
         SharedPreferences.Editor editor= PreferenceManager.getDefaultSharedPreferences(context).edit();
-        Log.i("data","shared3");
         editor.putBoolean("city_selected",true);
-        Log.i("data","shared4");
         editor.putString("city_name",cityName);
         editor.putString("weather_code",weatherCode);
         editor.putString("temp1",temp1);
@@ -132,10 +127,7 @@ public class Utility {
         editor.putString("weather_desp",weatherDesp);
         editor.putString("publish_time",publishTime);
         editor.putString("current_data",adf.format(new Date()));
-        //editor.putString("current_data",new Date().toString());
-        Log.i("data","shared5");
         editor.commit();
-        Log.i("data","shared6");
 
 
     }
