@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.weather.coolweather.R;
+import com.example.weather.coolweather.service.AutoUpdateService;
 import com.example.weather.coolweather.util.HttpCallbackListener;
 import com.example.weather.coolweather.util.HttpUtil;
 import com.example.weather.coolweather.util.Utility;
@@ -123,6 +124,9 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
         publishText.setText(getText(R.string.today)+prefs.getString("publish_time","")+getText(R.string.publish));
         weatherInfoLayout.setVisibility(View.VISIBLE);
         cityNameText.setVisibility(View.VISIBLE);
+        //启动服务，用于后台自动更新天气信息
+        Intent serviceIntent=new Intent(this, AutoUpdateService.class);
+        startService(serviceIntent);
     }
 
     @Override
