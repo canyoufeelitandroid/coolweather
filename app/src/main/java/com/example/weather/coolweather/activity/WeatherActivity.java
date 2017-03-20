@@ -1,16 +1,17 @@
 package com.example.weather.coolweather.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.weather.coolweather.R;
@@ -23,7 +24,7 @@ import com.example.weather.coolweather.util.Utility;
  * Created by 64088 on 2017/3/17.
  */
 
-public class WeatherActivity extends Activity implements View.OnClickListener{
+public class WeatherActivity extends BaseActivity implements View.OnClickListener{
     private LinearLayout weatherInfoLayout;
 
     private TextView cityNameText;
@@ -133,10 +134,11 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.switch_city:
-                Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
-                switchIntent.putExtra("from_weather_activity",true);
-                startActivity(switchIntent);
-                finish();
+                showPopupMenu(view);
+//                Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
+//                switchIntent.putExtra("from_weather_activity",true);
+//                startActivity(switchIntent);
+//                finish();
                 break;
             case R.id.refresh_weather:
                 //从sharedPreference里获得weatherCode,然后重新获取刷新天气
@@ -150,6 +152,33 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
             default:
                 break;
         }
+
+    }
+
+    /**
+     * 下拉选择设置或切换城市
+     */
+    private void  showPopupMenu(View view){
+        PopupMenu popupMenu=new PopupMenu(this,view);
+        popupMenu.getMenuInflater().inflate(R.menu.popup_menu,popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(getText(R.string.choose).equals(menuItem.getTitle())){
+                    Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
+                    switchIntent.putExtra("from_weather_activity",true);
+                    startActivity(switchIntent);
+                    finish();
+                    return true;
+                }else if(getText(R.string.setting).equals(menuItem.getTitle())){
+                    Intent settingIntent=new Intent(WeatherActivity.this,SettingActivity.class);
+                    startActivity(settingIntent);
+                    return true;
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
 
     }
 }

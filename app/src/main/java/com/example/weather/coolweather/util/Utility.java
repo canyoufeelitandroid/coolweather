@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.example.weather.coolweather.db.CoolWeatherDB;
 import com.example.weather.coolweather.model.City;

@@ -1,6 +1,5 @@
 package com.example.weather.coolweather.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,7 +31,7 @@ import java.util.List;
  * Created by 64088 on 2017/3/17.
  */
 
-public class ChooseActivity extends Activity {
+public class ChooseActivity extends BaseActivity {
 
     public static final int LEVEL_PROVINCE=0;
     public static final int LEVEL_CITY=1;

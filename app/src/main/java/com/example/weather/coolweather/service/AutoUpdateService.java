@@ -20,6 +20,8 @@ import com.example.weather.coolweather.util.Utility;
  */
 
 public class AutoUpdateService extends Service {
+    private long updateHour=8*60*60*1000;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -27,19 +29,28 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                updateWeather();
-            }
-        }).start();
-        AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
-        long everyTime= SystemClock.elapsedRealtime()+8*60*60*1000;
-        //long everyTime= SystemClock.elapsedRealtime()+5*1000;
-        Intent i=new Intent(this, AutoUpdateReceiver.class);
-        PendingIntent pi=PendingIntent.getBroadcast(this,0,i,0);
-        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,everyTime,pi);
-
+        SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(this);
+        boolean updata_auto=sharedPreferences.getBoolean("auto_update",false);
+        int hourIndex=sharedPreferences.getInt("update_hour_index",2);
+        if(hourIndex==0){
+            updateHour=2*60*60*1000;
+        }else if(hourIndex==1){
+            updateHour=4*60*60*1000;
+        }
+        if(updata_auto) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    updateWeather();
+                }
+            }).start();
+            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            long everyTime = SystemClock.elapsedRealtime() +updateHour;
+            //long everyTime= SystemClock.elapsedRealtime()+5*1000;
+            Intent i = new Intent(this, AutoUpdateReceiver.class);
+            PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
+            manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, everyTime, pi);
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
