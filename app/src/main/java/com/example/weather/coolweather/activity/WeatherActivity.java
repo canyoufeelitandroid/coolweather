@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -15,6 +16,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.weather.coolweather.R;
+import com.example.weather.coolweather.controls.TitlePopup;
+import com.example.weather.coolweather.model.ActionItem;
 import com.example.weather.coolweather.service.AutoUpdateService;
 import com.example.weather.coolweather.util.HttpCallbackListener;
 import com.example.weather.coolweather.util.HttpUtil;
@@ -36,6 +39,9 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
     private Button switchCityBtn;
     private Button refreshWeatherBtn;
 
+    //自定义下拉菜单初始化
+    private TitlePopup titlePopup;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +61,24 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
     }
 
     private void initUI(){
+        titlePopup=new TitlePopup(this, ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        titlePopup.addAction(new ActionItem(this,R.string.choose));
+        titlePopup.addAction(new ActionItem(this,R.string.setting));
+        titlePopup.setItemOnClickListener(new TitlePopup.OnItemOnClickListener() {
+            @Override
+            public void onItemClick(ActionItem item, int position) {
+                if(item.mTitle==getText(R.string.choose)){
+                    Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
+                    switchIntent.putExtra("from_weather_activity",true);
+                    startActivity(switchIntent);
+                    finish();
+                }else{
+                    Intent settingIntent=new Intent(WeatherActivity.this,SettingActivity.class);
+                    startActivity(settingIntent);
+                }
+            }
+        });
+
         weatherInfoLayout=(LinearLayout)findViewById(R.id.weather_info_layout);
         cityNameText=(TextView)findViewById(R.id.city_name);
         publishText=(TextView)findViewById(R.id.publish_text);
@@ -134,11 +158,7 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.switch_city:
-                showPopupMenu(view);
-//                Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
-//                switchIntent.putExtra("from_weather_activity",true);
-//                startActivity(switchIntent);
-//                finish();
+                titlePopup.show(view);
                 break;
             case R.id.refresh_weather:
                 //从sharedPreference里获得weatherCode,然后重新获取刷新天气
@@ -161,6 +181,7 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
     private void  showPopupMenu(View view){
         PopupMenu popupMenu=new PopupMenu(this,view);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu,popupMenu.getMenu());
+
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {

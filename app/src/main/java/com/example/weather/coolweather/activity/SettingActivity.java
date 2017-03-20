@@ -45,9 +45,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         }
         autoUpdate=pfs.getBoolean("auto_update",false);
         setContentView(R.layout.setting_layout);
-        initUI();
         Log.i("data","create");
-
+        initUI();
 
     }
 
