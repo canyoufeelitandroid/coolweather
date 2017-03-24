@@ -18,6 +18,7 @@
         </activity>
         <activity android:name=".activity.WeatherActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
         <activity android:name=".activity.SettingActivity"/>
+        <activity android:name=".activity.CityManagerActivity"/>
         <service android:name=".service.AutoUpdateService"/>
         <receiver android:name=".receiver.AutoUpdateReceiver"/>
     </application>

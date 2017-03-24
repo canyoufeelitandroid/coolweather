@@ -35,6 +35,19 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
             "county_code text," +
             "city_id integer)";
 
+    /**
+     * 城市管理 表建表语句
+     *
+     */
+    public static final String CREATE_CITY_MANAGER="create table City_Manager(" +
+            "id integer primary key autoincrement," +
+            "weather_code text," +
+            "county_name text," +
+            "weather_desp text," +
+            "temp1 text," +
+            "temp2 text," +
+            "publish_time text)";
+
     public CoolWeatherOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
@@ -44,10 +57,18 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_PROVINCE);
         db.execSQL(CREATE_CITY);
         db.execSQL(CREATE_COUNTY);
+        db.execSQL(CREATE_CITY_MANAGER);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        switch(i){
+            case 1:
+                sqLiteDatabase.execSQL(CREATE_CITY_MANAGER);
+                break;
+            default:
+                break;
+        }
 
     }
 }

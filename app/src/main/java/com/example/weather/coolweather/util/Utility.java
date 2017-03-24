@@ -9,6 +9,7 @@ import com.example.weather.coolweather.db.CoolWeatherDB;
 import com.example.weather.coolweather.model.City;
 import com.example.weather.coolweather.model.County;
 import com.example.weather.coolweather.model.Province;
+import com.example.weather.coolweather.model.WeatherItem;
 
 import org.json.JSONObject;
 
@@ -111,7 +112,7 @@ public class Utility {
     }
 
     /**
-     * 将服务器返回的额天气数据存储到SharedPreferences文件中
+     * 将服务器返回的天气数据存储到SharedPreferences文件中(及城市管理数据库)
      */
     public static void saveWeatherInfo(Context context,String cityName,String weatherCode,String temp1,
                                        String temp2,String weatherDesp,String publishTime){
@@ -128,6 +129,10 @@ public class Utility {
         editor.putString("current_data",adf.format(new Date()));
         editor.commit();
 
+        //城市管理 的数据存储
+        CoolWeatherDB db=CoolWeatherDB.getInstance(context);
+        WeatherItem item=new WeatherItem(cityName,weatherDesp,temp1,temp2,publishTime,weatherCode);
+        db.saveWeatherItem(item,true);
 
     }
 }

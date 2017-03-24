@@ -2,18 +2,20 @@ package com.example.weather.coolweather.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.weather.coolweather.R;
 import com.example.weather.coolweather.controls.TitlePopup;
@@ -29,6 +31,7 @@ import com.example.weather.coolweather.util.Utility;
 
 public class WeatherActivity extends BaseActivity implements View.OnClickListener{
     private LinearLayout weatherInfoLayout;
+    private RelativeLayout weatherLayout;
 
     private TextView cityNameText;
     private TextView publishText;
@@ -41,6 +44,8 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
 
     //自定义下拉菜单初始化
     private TitlePopup titlePopup;
+    //记录第一次按下返回的时间（毫秒）
+    long firstTime=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +54,20 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
         setContentView(R.layout.weather_layout);
         initUI();
         String countyCode=getIntent().getStringExtra("county_code");
+        String weatherCode=getIntent().getStringExtra("weather_code");
         if(!TextUtils.isEmpty(countyCode)){
             //有县级代号就去查询天气
             publishText.setText("同步中...");
             weatherInfoLayout.setVisibility(View.INVISIBLE);
             cityNameText.setVisibility(View.INVISIBLE);
             queryWeatherCode(countyCode);
-        }else {
+        }else if(!TextUtils.isEmpty(weatherCode)){
+            //有天气代号就去查询天气
+            publishText.setText("同步中...");
+            weatherInfoLayout.setVisibility(View.INVISIBLE);
+            cityNameText.setVisibility(View.INVISIBLE);
+            queryWeatherInfo(weatherCode);
+        }else{
             showWeather();
         }
     }
@@ -64,6 +76,7 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
         titlePopup=new TitlePopup(this, ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         titlePopup.addAction(new ActionItem(this,R.string.choose));
         titlePopup.addAction(new ActionItem(this,R.string.setting));
+        titlePopup.addAction(new ActionItem(this,R.string.citymanager));
         titlePopup.setItemOnClickListener(new TitlePopup.OnItemOnClickListener() {
             @Override
             public void onItemClick(ActionItem item, int position) {
@@ -72,9 +85,12 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
                     switchIntent.putExtra("from_weather_activity",true);
                     startActivity(switchIntent);
                     finish();
-                }else{
+                }else if(item.mTitle==getText(R.string.setting)){
                     Intent settingIntent=new Intent(WeatherActivity.this,SettingActivity.class);
                     startActivity(settingIntent);
+                }else {
+                    Intent managerIntent=new Intent(WeatherActivity.this,CityManagerActivity.class);
+                    startActivity(managerIntent);
                 }
             }
         });
@@ -88,6 +104,7 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
         currentDataText=(TextView)findViewById(R.id.current_data);
         switchCityBtn=(Button)findViewById(R.id.switch_city);
         refreshWeatherBtn=(Button)findViewById(R.id.refresh_weather);
+        weatherLayout=(RelativeLayout)findViewById(R.id.weather_layout_background);
         switchCityBtn.setOnClickListener(this);
         refreshWeatherBtn.setOnClickListener(this);
     }
@@ -149,9 +166,40 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
         publishText.setText(getText(R.string.today)+prefs.getString("publish_time","")+getText(R.string.publish));
         weatherInfoLayout.setVisibility(View.VISIBLE);
         cityNameText.setVisibility(View.VISIBLE);
+        String desp_weather=prefs.getString("weather_desp","");
+        showBackground(desp_weather);
+
         //启动服务，用于后台自动更新天气信息
         Intent serviceIntent=new Intent(this, AutoUpdateService.class);
         startService(serviceIntent);
+    }
+
+    /**
+     * 根据天气设置不同的背景图
+     *
+     */
+    private void showBackground(String desp){
+        switch (desp){
+            case "晴":
+                weatherLayout.setBackgroundResource(R.drawable.sun_day);
+                break;
+            case "小雨":
+                weatherLayout.setBackgroundResource(R.drawable.rain_day);
+                break;
+            case "中雨":
+                weatherLayout.setBackgroundResource(R.drawable.center_rain_day);
+                break;
+            case "阴":
+                weatherLayout.setBackgroundResource(R.drawable.cloudy_more_day);
+                break;
+            case "多云":
+                weatherLayout.setBackgroundResource(R.drawable.cloudy_less_day);
+                break;
+            default:
+                weatherLayout.setBackgroundColor(getResources().getColor(R.color.normalColor));
+                break;
+        }
+
     }
 
     @Override
@@ -176,30 +224,23 @@ public class WeatherActivity extends BaseActivity implements View.OnClickListene
     }
 
     /**
-     * 下拉选择设置或切换城市
+     * 双击退出程序
      */
-    private void  showPopupMenu(View view){
-        PopupMenu popupMenu=new PopupMenu(this,view);
-        popupMenu.getMenuInflater().inflate(R.menu.popup_menu,popupMenu.getMenu());
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            long secondTime=System.currentTimeMillis();
+            if(secondTime-firstTime>800){//如果两次按键时间间隔大于800毫秒，则不退出
+                Toast toast=Toast.makeText(WeatherActivity.this,"再按一次退出程序",Toast.LENGTH_SHORT);
+                toast.getView().setBackgroundColor(Color.parseColor("#FFCC00"));
 
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                if(getText(R.string.choose).equals(menuItem.getTitle())){
-                    Intent switchIntent=new Intent(WeatherActivity.this,ChooseActivity.class);
-                    switchIntent.putExtra("from_weather_activity",true);
-                    startActivity(switchIntent);
-                    finish();
-                    return true;
-                }else if(getText(R.string.setting).equals(menuItem.getTitle())){
-                    Intent settingIntent=new Intent(WeatherActivity.this,SettingActivity.class);
-                    startActivity(settingIntent);
-                    return true;
-                }
-                return false;
+                toast.show();
+                firstTime=secondTime;
+                return true;
+            }else{
+                System.exit(0);
             }
-        });
-        popupMenu.show();
-
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }

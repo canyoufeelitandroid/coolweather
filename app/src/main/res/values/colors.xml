@@ -6,4 +6,7 @@
     <color name="titleBackground">#484E61</color>
     <color name="smallTitleBackground">#484E54</color>
     <color name="gray">#CFCFCF</color>
+    <color name="normalColor">#27A5F9</color>
+    <color name="violet">#9F79EE</color>
+    <color name="darkGreen">#48D1CC</color>
 </resources>
